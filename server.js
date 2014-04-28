@@ -21,9 +21,9 @@ var getAppacitiveInstance = function (user, userToken) {
     Appacitive.config.apiBaseUrl = 'http://apis.appacitive.com/v1.0/'
 
     Appacitive.initialize({ 
-        apikey: "sSfHIv9RZMojN4Ih3MiLYCgdnQuW8RrpRbpDw5IiQfo=", 
+        apikey: "{{your_apikey}}", 
         env: "sandbox",
-        appId: "57208653680346724",
+        appId: "{{your_app_id}}",
         userToken: userToken, 
         user: user
     });
@@ -573,7 +573,7 @@ var removeTags = function(Appacitive, bookmark, filter, destroyCon, cb) {
             }
         });
 
-        if(tasks.length == 0) {
+        if (tasks.length == 0) {
             if(cb) cb();
             return;
         }
