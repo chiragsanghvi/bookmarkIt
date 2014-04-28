@@ -317,26 +317,24 @@ app.put('/json/user/password', function(req, res) {
     
 });
 
-var searchTags = function(id, tags, filter, Appacitive, cb)  {
+var searchTags = function(userId, tags, filter, Appacitive, cb)  {
     
-    var filterQuery = new Appacitive.Queries.GraphFilterQuery('user_tag', { 
-        id : id, 
-        tagFilter: filter
+    var Tags = Appacitive.Object.extend('tag');
+
+    var createdByFilter = Appacitive.Filter.Property('__createdby').equalToNumber(userId);
+
+    if (typeof(filter) == 'string') {
+        filter = createdByFilter;
+    } else {
+        filter = createdByFilter.And(filter);
+    }
+
+    var query = Tags.findAll({
+        filter: filter,
+        fields: ["tag", "$count"]
     });
 
-    filterQuery.fetch().then(function(ids) {
-        if (ids.length == 0) {
-            var promise = new Appacitive.Promise();
-            promise.fulfill();
-            return promise;
-        }
-
-        return Appacitive.Object.multiGet({ 
-          type: 'tag',
-          ids: ids,
-          fields: ["tag", "$count"]
-        });
-    }).then(function(results) {
+    query.fetch().then(function(results) {
         if (!results || !results.forEach) results = [];
         
         results.forEach(function(r) { tags.push(r); });
@@ -344,7 +342,7 @@ var searchTags = function(id, tags, filter, Appacitive, cb)  {
         cb();
     }, function(err) {
         if (evaluateResponse(err)) cb(err);
-    });
+    }) 
 };
 
 //Retrieve a user's tags
@@ -365,7 +363,13 @@ app.get('/json/tag', function(req, res) {
         else {
             var resTags = [];
             tags.forEach(function(r) {
-                resTags.push({ tag: r.get('tag'), id: r.id(), count: r.aggregate('count').all });
+                var contains = resTags.find(function(t) { return r.get('tag') == t.tag });
+
+                if (contains) {
+                    contains.count = parseInt(contains.count) + 1;
+                } else {
+                    resTags.push({ tag: r.get('tag'), id: r.id(), count: r.aggregate('count').all });
+                }
             });
             tags = resTags;
         }
@@ -399,8 +403,13 @@ app.get('/json/autocomplete', function(req, res) {
         if (err) console.log(err);
         else {
             var resTags = [];
+            
             tags.forEach(function(r) {
-                resTags.push({ tag: r.get('tag'), id: r.id() });
+                var contains = resTags.find(function(t) { return r.get('tag') == t.tag });
+
+                if (!contains) {
+                    resTags.push({ tag: r.get('tag'), id: r.id() });
+                }
             });
             tags = resTags;
         }
@@ -507,7 +516,7 @@ app.get('/json/bookmark', function(req, res) {
     
     var result = { bookmarks:[], totalRecords: 0 };
 
-    var user = Appacitive.User.current(Appacitive);
+    var user = Appacitive.User.current();
     
     var query = user.getConnectedObjects({
         relation: 'mybookmark',
@@ -573,7 +582,7 @@ var removeTags = function(Appacitive, bookmark, filter, destroyCon, cb) {
             }
         });
 
-        if(tasks.length == 0) {
+        if (tasks.length == 0) {
             if(cb) cb();
             return;
         }
