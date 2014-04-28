@@ -115,7 +115,7 @@ var EditView = Backbone.View.extend({
         }
 
         if (this.model.hasChanged('url')) {
-            this.model.set('urlChanged', true);
+            this.model.set({ urlChanged: true });
         }
 
         this.model.set({ addTags: this.addTags, timestamp: new Date().getTime(), tags: tags }, { silent: true });

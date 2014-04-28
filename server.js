@@ -142,7 +142,8 @@ app.get('*', function(req, res, next) {
     if (req.url.indexOf('/json') == 0 ) return next();
     
     var init = "$(document).ready(function() { App.initialize(); });";
-    if (typeof req.session.user != 'undefined') {
+    if (typeof req.session.user_token != 'undefined') {
+        console.log(req.session);
         init = "$(document).ready(function() { App.user = " + JSON.stringify(req.session.user) + "; App.initialize(); });";
     }
     
@@ -175,15 +176,15 @@ app.post('/json/register', function(req, res) {
     Appacitive.User.signup(user).then(function(authResult) {
         user = authResult.user.toJSON();
         user.id = authResult.user.id();
-
-        res.writeHead(200, { 'Content-Type': 'application/javascript' });
-        res.write(JSON.stringify(user), 'utf8');
-        
+                
         req.session.user_id = user.id;
         req.session.user_token = authResult.token;
 
         delete user.password;
         req.session.user = user;         
+
+        res.writeHead(200, { 'Content-Type': 'application/javascript' });
+        res.write(JSON.stringify(user), 'utf8');
 
         res.end('\n');
     }, function(err) {
@@ -214,7 +215,7 @@ app.post('/json/login', function(req, res) {
 
         res.setHeader('Cache-Control', 'max-age=0, must-revalidate, no-cache, no-store');
         res.writeHead(200, { 'Content-Type': 'application/javascript' });
-        res.write(JSON.stringify(user.toJSON()), 'utf8');
+        res.write(JSON.stringify({ id: user.id(), username: user.get('username'), firstname: user.get('firstname'), email: user.get('email'), last_login: user.get('last_login') }), 'utf8');
         res.end('\n');
 
         user.set('last_login', Appacitive.Date.toISOString(new Date()));
@@ -317,26 +318,24 @@ app.put('/json/user/password', function(req, res) {
     
 });
 
-var searchTags = function(id, tags, filter, Appacitive, cb)  {
+var searchTags = function(userId, tags, filter, Appacitive, cb)  {
     
-    var filterQuery = new Appacitive.Queries.GraphFilterQuery('user_tag', { 
-        id : id, 
-        tagFilter: filter
+    var Tags = Appacitive.Object.extend('tag');
+
+    var createdByFilter = Appacitive.Filter.Property('__createdby').equalToNumber(userId);
+
+    if (typeof(filter) == 'string') {
+        filter = createdByFilter;
+    } else {
+        filter = createdByFilter.And(filter);
+    }
+
+    var query = Tags.findAll({
+        filter: filter,
+        fields: ["tag", "$count"]
     });
 
-    filterQuery.fetch().then(function(ids) {
-        if (ids.length == 0) {
-            var promise = new Appacitive.Promise();
-            promise.fulfill();
-            return promise;
-        }
-
-        return Appacitive.Object.multiGet({ 
-          type: 'tag',
-          ids: ids,
-          fields: ["tag", "$count"]
-        });
-    }).then(function(results) {
+    query.fetch().then(function(results) {
         if (!results || !results.forEach) results = [];
         
         results.forEach(function(r) { tags.push(r); });
@@ -344,7 +343,7 @@ var searchTags = function(id, tags, filter, Appacitive, cb)  {
         cb();
     }, function(err) {
         if (evaluateResponse(err)) cb(err);
-    });
+    }) 
 };
 
 //Retrieve a user's tags
@@ -365,7 +364,13 @@ app.get('/json/tag', function(req, res) {
         else {
             var resTags = [];
             tags.forEach(function(r) {
-                resTags.push({ tag: r.get('tag'), id: r.id(), count: r.aggregate('count').all });
+                var contains = resTags.find(function(t) { return r.get('tag') == t.tag });
+
+                if (contains) {
+                    contains.count = parseInt(contains.count) + 1;
+                } else {
+                    resTags.push({ tag: r.get('tag'), id: r.id(), count: r.aggregate('count').all });
+                }
             });
             tags = resTags;
         }
@@ -399,8 +404,13 @@ app.get('/json/autocomplete', function(req, res) {
         if (err) console.log(err);
         else {
             var resTags = [];
+            
             tags.forEach(function(r) {
-                resTags.push({ tag: r.get('tag'), id: r.id() });
+                var contains = resTags.find(function(t) { return r.get('tag') == t.tag });
+
+                if (!contains) {
+                    resTags.push({ tag: r.get('tag'), id: r.id() });
+                }
             });
             tags = resTags;
         }
@@ -497,7 +507,7 @@ app.get('/json/bookmark', function(req, res) {
         res.write(JSON.stringify({bookmarks: [], totalRecords: 0 }), 'utf-8');
         res.end('\n');  
 */
-    if (typeof req.session.user_id == 'undefined') {
+    if (typeof req.session.user_token == 'undefined') {
         res.writeHead(401, { 'Content-type': 'text/html' });
         res.end();
         return;
@@ -507,7 +517,7 @@ app.get('/json/bookmark', function(req, res) {
     
     var result = { bookmarks:[], totalRecords: 0 };
 
-    var user = Appacitive.User.current(Appacitive);
+    var user = Appacitive.User.current();
     
     var query = user.getConnectedObjects({
         relation: 'mybookmark',
@@ -596,7 +606,7 @@ var removeTags = function(Appacitive, bookmark, filter, destroyCon, cb) {
 //Update a bookmark
 app.put('/json/bookmark/:id', function(req, res) {
 
-    if (typeof req.session.user_id == 'undefined') {
+    if (typeof req.session.user_token == 'undefined') {
         res.writeHead(401, { 'Content-type': 'text/html' });
         res.end();
         return;
@@ -690,7 +700,7 @@ app.put('/json/bookmark/:id', function(req, res) {
 //Create a new bookmark
 app.post('/json/bookmark/:id?', function(req, res) {
     
-    if (typeof req.session.user_id == 'undefined') {
+    if (typeof req.session.user_token == 'undefined') {
         res.writeHead(401, { 'Content-type': 'text/html' });
         res.end();
         return;
@@ -754,7 +764,7 @@ app.post('/json/bookmark/:id?', function(req, res) {
 //Delete a bookmark
 app.del('/json/bookmark/:id', function(req, res) {
   
-    if (typeof req.session.user_id == 'undefined') {
+    if (typeof req.session.user_token == 'undefined') {
         res.writeHead(401, { 'Content-type': 'text/html' });
         res.end();
         return;
@@ -779,7 +789,7 @@ app.del('/json/bookmark/:id', function(req, res) {
 //Import bookmarks from an HTML file
 app.post('/json/import', function(req, res) {
   
-    if (typeof req.session.user_id == 'undefined') {
+    if (typeof req.session.user_token == 'undefined') {
         res.writeHead(401, { 'Content-type': 'text/html' });
         res.end();
         return;
