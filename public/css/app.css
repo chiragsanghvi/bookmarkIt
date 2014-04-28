@@ -348,3 +348,4 @@ body {
     top: 45%;
     left: 50%;
 }
+.ui-autocomplete-loading { background:url('/images/indicator.gif') no-repeat right center !important ;}

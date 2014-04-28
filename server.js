@@ -332,7 +332,8 @@ var searchTags = function(userId, tags, filter, Appacitive, cb)  {
 
     var query = Tags.findAll({
         filter: filter,
-        fields: ["tag", "$count"]
+        fields: ["tag", "$count"],
+        pageSize: 5
     });
 
     query.fetch().then(function(results) {
@@ -381,7 +382,7 @@ app.get('/json/tag', function(req, res) {
         res.end('\n'); 
     };
 
-    var filter = Appacitive.Filter.Aggregate('count').greaterThanEqualTo(1).toString();
+    var filter = Appacitive.Filter.Aggregate('count').greaterThanEqualTo(1);
     
     searchTags(req.session.user_id, tags, filter, Appacitive, cb)
 
@@ -423,7 +424,7 @@ app.get('/json/autocomplete', function(req, res) {
 
     var filter = '';
 
-    if (req.query['term']) filter = Appacitive.Filter.Property('tag').match(req.query['term']).toString();
+    if (req.query['term']) filter = Appacitive.Filter.Property('tag').match(req.query['term']);
 
     searchTags(req.session.user_id, tags, filter, Appacitive, cb);
     
