@@ -142,7 +142,8 @@ app.get('*', function(req, res, next) {
     if (req.url.indexOf('/json') == 0 ) return next();
     
     var init = "$(document).ready(function() { App.initialize(); });";
-    if (typeof req.session.user != 'undefined') {
+    if (typeof req.session.user_token != 'undefined') {
+        console.log(req.session);
         init = "$(document).ready(function() { App.user = " + JSON.stringify(req.session.user) + "; App.initialize(); });";
     }
     
@@ -506,7 +507,7 @@ app.get('/json/bookmark', function(req, res) {
         res.write(JSON.stringify({bookmarks: [], totalRecords: 0 }), 'utf-8');
         res.end('\n');  
 */
-    if (typeof req.session.user_id == 'undefined') {
+    if (typeof req.session.user_token == 'undefined') {
         res.writeHead(401, { 'Content-type': 'text/html' });
         res.end();
         return;
@@ -605,7 +606,7 @@ var removeTags = function(Appacitive, bookmark, filter, destroyCon, cb) {
 //Update a bookmark
 app.put('/json/bookmark/:id', function(req, res) {
 
-    if (typeof req.session.user_id == 'undefined') {
+    if (typeof req.session.user_token == 'undefined') {
         res.writeHead(401, { 'Content-type': 'text/html' });
         res.end();
         return;
@@ -699,7 +700,7 @@ app.put('/json/bookmark/:id', function(req, res) {
 //Create a new bookmark
 app.post('/json/bookmark/:id?', function(req, res) {
     
-    if (typeof req.session.user_id == 'undefined') {
+    if (typeof req.session.user_token == 'undefined') {
         res.writeHead(401, { 'Content-type': 'text/html' });
         res.end();
         return;
@@ -763,7 +764,7 @@ app.post('/json/bookmark/:id?', function(req, res) {
 //Delete a bookmark
 app.del('/json/bookmark/:id', function(req, res) {
   
-    if (typeof req.session.user_id == 'undefined') {
+    if (typeof req.session.user_token == 'undefined') {
         res.writeHead(401, { 'Content-type': 'text/html' });
         res.end();
         return;
@@ -788,7 +789,7 @@ app.del('/json/bookmark/:id', function(req, res) {
 //Import bookmarks from an HTML file
 app.post('/json/import', function(req, res) {
   
-    if (typeof req.session.user_id == 'undefined') {
+    if (typeof req.session.user_token == 'undefined') {
         res.writeHead(401, { 'Content-type': 'text/html' });
         res.end();
         return;

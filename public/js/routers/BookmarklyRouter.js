@@ -29,6 +29,9 @@ var BookmarklyRouter = Backbone.Router.extend({
     },
     
     index: function() {
+
+        console.log(App.User);
+
         //if the user is logged in, show their bookmarks, otherwise show the signup form
         if (typeof App.user != 'undefined') {
             this.navigate("bookmarks", true);
