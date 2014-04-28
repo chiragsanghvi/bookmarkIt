@@ -318,7 +318,7 @@ app.put('/json/user/password', function(req, res) {
     
 });
 
-var searchTags = function(userId, tags, filter, Appacitive, cb)  {
+var searchTags = function(userId, tags, filter, Appacitive, cb, pSize)  {
     
     var Tags = Appacitive.Object.extend('tag');
 
@@ -333,7 +333,7 @@ var searchTags = function(userId, tags, filter, Appacitive, cb)  {
     var query = Tags.findAll({
         filter: filter,
         fields: ["tag", "$count"],
-        pageSize: 5
+        pageSize: pSize || 5
     });
 
     query.fetch().then(function(results) {
@@ -426,7 +426,7 @@ app.get('/json/autocomplete', function(req, res) {
 
     if (req.query['term']) filter = Appacitive.Filter.Property('tag').match(req.query['term']);
 
-    searchTags(req.session.user_id, tags, filter, Appacitive, cb);
+    searchTags(req.session.user_id, tags, filter, Appacitive, cb, 5);
     
     console.log('autocomplete # ' + req.url + ' # ' + req.query['term']);
 });
