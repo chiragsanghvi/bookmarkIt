@@ -176,15 +176,15 @@ app.post('/json/register', function(req, res) {
     Appacitive.User.signup(user).then(function(authResult) {
         user = authResult.user.toJSON();
         user.id = authResult.user.id();
-
-        res.writeHead(200, { 'Content-Type': 'application/javascript' });
-        res.write(JSON.stringify(user), 'utf8');
-        
+                
         req.session.user_id = user.id;
         req.session.user_token = authResult.token;
 
         delete user.password;
         req.session.user = user;         
+
+        res.writeHead(200, { 'Content-Type': 'application/javascript' });
+        res.write(JSON.stringify(user), 'utf8');
 
         res.end('\n');
     }, function(err) {
@@ -215,7 +215,7 @@ app.post('/json/login', function(req, res) {
 
         res.setHeader('Cache-Control', 'max-age=0, must-revalidate, no-cache, no-store');
         res.writeHead(200, { 'Content-Type': 'application/javascript' });
-        res.write(JSON.stringify(user.toJSON()), 'utf8');
+        res.write(JSON.stringify({ id: user.id(), username: user.get('username'), firstname: user.get('firstname'), email: user.get('email'), last_login: user.get('last_login') }), 'utf8');
         res.end('\n');
 
         user.set('last_login', Appacitive.Date.toISOString(new Date()));
