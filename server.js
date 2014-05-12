@@ -175,7 +175,7 @@ app.post('/json/register', function(req, res) {
     
     Appacitive.User.signup(user).then(function(authResult) {
         user = authResult.user.toJSON();
-        user.id = authResult.user.id();
+        user.id = authResult.user.id;
                 
         req.session.user_id = user.id;
         req.session.user_token = authResult.token;
@@ -209,13 +209,13 @@ app.post('/json/login', function(req, res) {
     
     Appacitive.User.login(username, password).then(function(authResult) {
         var user = authResult.user;
-        req.session.user_id = user.id();
+        req.session.user_id = user.id;
         req.session.user_token = authResult.token;
         req.session.user = user.toJSON();
 
         res.setHeader('Cache-Control', 'max-age=0, must-revalidate, no-cache, no-store');
         res.writeHead(200, { 'Content-Type': 'application/javascript' });
-        res.write(JSON.stringify({ id: user.id(), username: user.get('username'), firstname: user.get('firstname'), email: user.get('email'), last_login: user.get('last_login') }), 'utf8');
+        res.write(JSON.stringify({ id: user.id, username: user.get('username'), firstname: user.get('firstname'), email: user.get('email'), last_login: user.get('last_login') }), 'utf8');
         res.end('\n');
 
         user.set('last_login', Appacitive.Date.toISOString(new Date()));
@@ -370,7 +370,7 @@ app.get('/json/tag', function(req, res) {
                 if (contains) {
                     contains.count = parseInt(contains.count) + 1;
                 } else {
-                    resTags.push({ tag: r.get('tag'), id: r.id(), count: r.aggregate('count').all });
+                    resTags.push({ tag: r.get('tag'), id: r.id, count: r.aggregate('count').all });
                 }
             });
             tags = resTags;
@@ -410,7 +410,7 @@ app.get('/json/autocomplete', function(req, res) {
                 var contains = resTags.find(function(t) { return r.get('tag') == t.tag });
 
                 if (!contains) {
-                    resTags.push({ tag: r.get('tag'), id: r.id() });
+                    resTags.push({ tag: r.get('tag'), id: r.id });
                 }
             });
             tags = resTags;
@@ -435,7 +435,7 @@ var getBookmarkClass = function(Appacitive) {
     return Appacitive.Object.extend('bookmark', {
         getProperties: function() {
             return {
-                id: this.id(),
+                id: this.id,
                 title: this.get('title'),
                 description: this.get('description'),
                 tags: this.tags(),
@@ -781,7 +781,7 @@ app.del('/json/bookmark/:id', function(req, res) {
         bkmrk.destroyWithConnections().then(function() { 
             //create file object
             var file = new Appacitive.File({
-                fileId: bkmrk.id() +'.png'
+                fileId: bkmrk.id +'.png'
             });
 
             file.destroy();
