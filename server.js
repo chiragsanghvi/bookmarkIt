@@ -10,7 +10,7 @@ var express = require('express'),
     parser = require('uglify-js').parser,
     uglifyer = require('uglify-js').uglify;
     
-var webshotProcess = require('child_process').fork('./webshot.js');
+var webshotProcess = require('child_process').fork('webshot.js');
 
 //var RedisStore = require('connect-redis')(express);
 
@@ -778,7 +778,15 @@ app.del('/json/bookmark/:id', function(req, res) {
     var bkmrk = new Bookmark({ __id: req.params.id });
   
     removeTags(Appacitive, bkmrk, '', true, function() {
-        bkmrk.destroyWithConnections().then(function() { }, function(err) {
+        bkmrk.destroyWithConnections().then(function() {
+            //create file object
+            var file = new Appacitive.File({
+                fileId: bkmrk.id() +'.png'
+            });
+
+            file.destroy();
+            
+        }, function(err) {
             console.log(err);
         });
     });

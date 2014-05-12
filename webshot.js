@@ -5,6 +5,8 @@ var MessageProcessor = require('./messageProcessor.js');
 
 this.messageProcessor = new MessageProcessor(this);
 
+console.log("Starting webshot")
+
 Appacitive.initialize({ 
     apikey: "sSfHIv9RZMojN4Ih3MiLYCgdnQuW8RrpRbpDw5IiQfo=", 
     env: "sandbox",
