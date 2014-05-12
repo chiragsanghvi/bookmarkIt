@@ -13,30 +13,30 @@ Appacitive.initialize({
 
 var takeSnapshot = function(bookmark) {
 
-	webshot(bookmark.get('url') , './uploads/' + bookmark.id() + '.png', function(err) {
+	webshot(bookmark.get('url') , './uploads/' + bookmark.id + '.png', function(err) {
 	  	if (err) {
 	  		console.log(err);
 	  		return;
 	  	}
-	  	console.log("Image " + bookmark.id() + ".png saved");
+	  	console.log("Image " + bookmark.id + ".png saved");
 
-	  	require('fs').readFile('uploads/' + bookmark.id() + '.png', function(err, data) {
+	  	require('fs').readFile('uploads/' + bookmark.id + '.png', function(err, data) {
 	  		
 	  		if (err) {
 	  			console.log(err);
 	  			return;
 	  		}
 
-	  		console.log("Image " + bookmark.id() + ".png read from disk");
+	  		console.log("Image " + bookmark.id + ".png read from disk");
 
 	  		//create file object
 			var file = new Appacitive.File({
-				fileId: bookmark.id() +'.png',
+				fileId: bookmark.id +'.png',
 			    fileData: data,
 			    contentType: 'image/png'
 			});
 
-			console.log('file object created for ' + bookmark.id() + '.png');
+			console.log('file object created for ' + bookmark.id + '.png');
 
 			// save it on server
 			file.save().then(function(url) {
@@ -45,7 +45,7 @@ var takeSnapshot = function(bookmark) {
 				bookmark.set('screenshot_url', url);
     			
     			bookmark.save().then(function() {
-    				console.log("Screenshot url for " + bookmark.id() + ' saved');
+    				console.log("Screenshot url for " + bookmark.id + ' saved');
     			}, function(err) {
     				console.log(err);
     			});
