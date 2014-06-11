@@ -124,7 +124,7 @@ var evaluateResponse = function(status, req, res) {
     if (status && status.code == '19036') {
         req.session = null;
         res.setHeader('Cache-Control', 'max-age=0, must-revalidate, no-cache, no-store');
-        res.writeHead(420, { 'Content-Type': 'application/javascript' });
+        res.writeHead(401, { 'Content-Type': 'application/javascript' });
         res.write(JSON.stringify({ code: '19036', message: 'Invalid user token'}), 'utf8');
         res.end('\n');
         return false;

@@ -60,9 +60,12 @@ var AppView = Backbone.View.extend({
             url: '/json/logout',
             dataType: 'json',
             success: function(data) {
-                window.location = '/';
             }
         });  
+
+        setTimeout(function() {
+            window.location = '/';
+        }, 1000);
     },
     
     toggleLogin: function(e) {
