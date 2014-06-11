@@ -91,10 +91,10 @@ function bundle() {
         bundle += "\n/**\n* " + file + ".js\n*/\n\n" + fs.readFileSync(__dirname + '/public/js/' + file + '.js') + "\n\n";
     });
     
-    var ast = parser.parse(bundle);
-    ast = uglifyer.ast_mangle(ast);
-    ast = uglifyer.ast_squeeze(ast);
-    bundle = uglifyer.gen_code(ast)
+    //var ast = parser.parse(bundle);
+    //ast = uglifyer.ast_mangle(ast);
+    //ast = uglifyer.ast_squeeze(ast);
+    //bundle = uglifyer.gen_code(ast)
     
     fs.writeFileSync(__dirname + '/public/js/bundle.js', bundle, 'utf8');
     
@@ -236,7 +236,7 @@ app.post('/json/logout', function(req, res) {
         Appacitive.User.current().logout(true);
     }
     req.session = null;
-    require('sys').log(req.session);
+    if(req.session != null) require('sys').log(req.session);
     res.writeHead(200, { 'Content-Type': 'text/html' });
     res.end();
 });
