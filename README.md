@@ -7,7 +7,6 @@ Some features:
 * Add bookmarks with a bookmarklet, Chrome extension or through the site
 * Saves URL, title, description, tags with autosuggest and a screenshot
 * Bookmark grid view resizes with the window and loads more bookmarks on scroll
-* Can import bookmark files exported from IE, Chrome, Firefox and Delicious
 * No page reloads at all, so moving between pages is near-instant and smooth
 * Combines and minifies all the JS source and view templates automatically when the server starts
 
