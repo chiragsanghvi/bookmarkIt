@@ -143,7 +143,7 @@ app.get('*', function(req, res, next) {
     
     var init = "$(document).ready(function() { App.initialize(); });";
     if (typeof req.session.user_token != 'undefined') {
-        console.log(req.session);
+        require('sys').log(req.session.user_token + " " + JSON.stringify(req.session.user));
         init = "$(document).ready(function() { App.user = " + JSON.stringify(req.session.user) + "; App.initialize(); });";
     }
     
@@ -236,6 +236,7 @@ app.post('/json/logout', function(req, res) {
         Appacitive.User.current().logout(true);
     }
     req.session = null;
+    require('sys').log(req.session);
     res.writeHead(200, { 'Content-Type': 'text/html' });
     res.end();
 });
