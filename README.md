@@ -1,6 +1,6 @@
 ![Bookmarkit.appacitive.com](http://bookmarkit.appacitive.com/images/homeshot.png)
 
-This repository contains the code behind [Bookmarkly](http://bookmarkit.appacitive.com), a bookmark organizer built with [Backbone.js](http://backbonejs.org/) in the browser and [Node.js](http://nodejs.org/) on the server with data persisted on [Appacitive](http://www.appacitive.com).
+This repository contains the code behind for [BookmarkIt](http://bookmarkit.appacitive.com), a bookmark organizer built with [Backbone.js](http://backbonejs.org/) in the browser and [Node.js](http://nodejs.org/) on the server with data persisted on [Appacitive](http://www.appacitive.com).
 
 Some features:
 
