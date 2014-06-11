@@ -8,7 +8,6 @@ var App = {
         Backbone.sync = function(method, model, options) {
             options.error = function(xhr, ajaxOptions, thrownError) {
                 if (xhr.status == 401) {
-                    debugger;
                     window.location = '/';
                 }
             }
