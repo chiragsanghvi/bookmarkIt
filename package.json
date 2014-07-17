@@ -2,8 +2,8 @@
   "name": "Bookmarkly",
   "description": "bookmarkly.com, a visual bookmarking site",
   "version": "0.0.1",
-  "author": "Dan Grossman",
-  "repo": "git@github.com:dangrossman/Bookmarkly.git",
+  "author": "Chirag Sanghvi",
+  "repo": "git@github.com:chiragsanghvi/Bookmarkly.git",
   "keywords": [],
   "dependencies": {
     "uglify-js":"1.2.5"
