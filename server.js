@@ -323,7 +323,7 @@ var searchTags = function(userId, tags, filter, Appacitive, cb, pSize)  {
     
     var Tags = Appacitive.Object.extend('tag');
 
-    var createdByFilter = Appacitive.Filter.Property('__createdby').equalToNumber(userId);
+    var createdByFilter = Appacitive.Filter.Property('__createdby').equalTo(userId);
 
     if (typeof(filter) == 'string') {
         filter = createdByFilter;

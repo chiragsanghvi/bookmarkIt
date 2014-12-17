@@ -16,7 +16,7 @@ var takeSnapshot = function(bookmark) {
 	webshot(bookmark.get('url') , './uploads/' + bookmark.id + '.png',  {
 			phantomConfig : {
 				'ignore-ssl-errors':'yes',
-				'ssl-protocol':'any'
+				'ssl-protocol':'tlsv1'
 			}
 		}, function(err) {
 	  	if (err) {
