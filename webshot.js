@@ -13,7 +13,12 @@ Appacitive.initialize({
 
 var takeSnapshot = function(bookmark) {
 
-	webshot(bookmark.get('url') , './uploads/' + bookmark.id + '.png', function(err) {
+	webshot(bookmark.get('url') , './uploads/' + bookmark.id + '.png',  {
+			phantomConfig : {
+				'ignore-ssl-errors':'yes',
+				'ssl-protocol':'any'
+			}
+		}, function(err) {
 	  	if (err) {
 	  		console.log(err);
 	  		return;
