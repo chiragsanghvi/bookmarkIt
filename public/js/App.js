@@ -14,7 +14,7 @@ var App = {
             sync(method, model, options);
         };        
         
-        this.router = new BookmarklyRouter();
+        this.router = new BookmarkItRouter();
         Backbone.history.start({pushState: true});
 
         var self = this;

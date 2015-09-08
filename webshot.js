@@ -11,7 +11,7 @@ Appacitive.initialize({
     appId: "57208653680346724"
 });
 
-var takeSnapshot = function(bookmark) {
+var takeSnapshot = function(bookmark, done) {
 
 	webshot(bookmark.get('url') , './uploads/' + bookmark.id + '.png',  {
 			phantomConfig : {
@@ -21,6 +21,7 @@ var takeSnapshot = function(bookmark) {
 		}, function(err) {
 	  	if (err) {
 	  		console.log(err);
+	  		if(done) done();
 	  		return;
 	  	}
 	  	console.log("Image " + bookmark.id + ".png saved");
@@ -29,6 +30,7 @@ var takeSnapshot = function(bookmark) {
 	  		
 	  		if (err) {
 	  			console.log(err);
+	  			if(done) done();
 	  			return;
 	  		}
 
@@ -51,11 +53,14 @@ var takeSnapshot = function(bookmark) {
     			
     			bookmark.save().then(function() {
     				console.log("Screenshot url for " + bookmark.id + ' saved');
+    				if(done) done();
     			}, function(err) {
     				console.log(err);
+    				if(done) done();
     			});
 			}, function(err) {
 			   console.log(err);
+			   if(done) done();
 			});
 		});
 	});
@@ -68,6 +73,45 @@ this.messageProcessor.register('BMSC', function(message) {
 });
 
 var that = this;
+
+//listen for new message when ready to execute
+this.messageProcessor.register('IMPORT', function(message) {
+	var bookmarks = message.bookmarks;
+
+	var processes = [];
+
+	function split(a, n) {
+	    var len = a.length,out = [], i = 0;
+	    while (i < len) {
+	        var size = Math.ceil((len - i) / n--);
+	        out.push(a.slice(i, i += size));
+	    }
+	    return out;
+	};
+
+	var messages = split(bookmarks, 5);
+
+	messages.forEach(function(m) {
+		var p = require('child_process').fork('./webshot.js');
+		p.send({ type: 'IMPORTINNER', bookmarks: m });
+	});
+});
+
+//listen for new message when ready to execute
+this.messageProcessor.register('IMPORTINNER', function(message) {
+	var bookmarks = message.bookmarks;
+
+	var someFunction = function() {
+		var bookmark = bookmarks.pop();
+		if (!bookmark) process.exit();
+		else {
+			bookmark = new Appacitive.Object(bookmark, true);
+			takeSnapshot(bookmark, someFunction);
+		}
+	};
+
+	someFunction();
+});
 
 process.on('message', function(message) {
 	console.log("Got message");

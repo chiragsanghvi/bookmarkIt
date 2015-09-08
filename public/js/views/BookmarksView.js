@@ -90,7 +90,8 @@ var BookmarksView = Backbone.View.extend({
             $('#loader').remove();
             $('#app').append('<div id="loader"></div>');
 
-            $.getJSON('/json/bookmark?offset=' + offset, function(data) {
+            $.getJSON('/json/bookmark?offset=' + this.offset, function(data) {
+                $('#loader').remove();
                 self.collection.unbind('add');
 
                 self.collection.totalRecords = data.totalRecords;

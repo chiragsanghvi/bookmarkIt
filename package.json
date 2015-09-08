@@ -1,9 +1,9 @@
 {
-  "name": "Bookmarkly",
-  "description": "bookmarkly.com, a visual bookmarking site",
+  "name": "BookmarkIt",
+  "description": "bookmarkIt, a visual bookmarking site",
   "version": "0.0.1",
-  "author": "Dan Grossman",
-  "repo": "git@github.com:dangrossman/Bookmarkly.git",
+  "author": "Chirag Sanghvi",
+  "repo": "git@github.com:chiragsanghvi/bookmarkIt.git",
   "keywords": [],
   "dependencies": {
     "uglify-js":"1.2.5"
@@ -12,5 +12,7 @@
     ,"appacitive": "x"
     ,"multiappacitive": "x"
     ,"webshot":"x"
+    ,"jsdom":"~1.0.1"
+    ,"underscore":"x"
   }
 }

@@ -80,7 +80,7 @@ function bundle() {
         'views/TagView',
         'views/TagsView',
         'views/AppView',
-        'routers/BookmarklyRouter',
+        'routers/BookmarkItRouter',
         'App'
     ];
     
@@ -371,7 +371,7 @@ app.get('/json/tag', function(req, res) {
                 if (contains) {
                     contains.count = parseInt(contains.count) + 1;
                 } else {
-                    resTags.push({ tag: r.get('tag'), id: r.id, count: r.aggregate('count').all });
+                    resTags.push({ tag: r.get('tag'), id: r.id, count: r.aggregate('count') ? r.aggregate('count').all : 0 });
                 }
             });
             tags = resTags;
@@ -383,9 +383,7 @@ app.get('/json/tag', function(req, res) {
         res.end('\n'); 
     };
 
-    var filter = Appacitive.Filter.Aggregate('count').greaterThanEqualTo(1);
-    
-    searchTags(req.session.user_id, tags, filter, Appacitive, cb)
+    searchTags(req.session.user_id, tags, "", Appacitive, cb)
 
 });
 
@@ -441,7 +439,7 @@ var getBookmarkClass = function(Appacitive) {
                 description: this.get('description'),
                 tags: this.tags(),
                 url: this.get('url'),
-                timestamp: this.get('__utclastupdateddate', 'datetime').getTime(),
+                timestamp: this.get('timestamp') ? this.get('timestamp') : this.get('__utclastupdateddate').getTime(),
                 screenshot: this.get('screenshot_url')
             }
         }
@@ -477,10 +475,11 @@ var getBookmark_TagConnectionClass = function(Appacitive) {
             if (bookmark instanceof Appacitive.Object) {
                 Tag = new Appacitive.Object.extend('tag');
                 
-                if (tag.id) tag.__id = tag.id;
-                delete tag.id;
-
-                tag = new Tag(tag);
+                if (!(tag instanceof Appacitive.Object)) {
+                    if (tag.id) tag.__id = tag.id;
+                    delete tag.id;
+                    tag = new Tag(tag);
+                }
 
                 var options = {
                     endpoints: [{
@@ -503,12 +502,7 @@ var getBookmark_TagConnectionClass = function(Appacitive) {
 
 //Return a user's bookmarks
 app.get('/json/bookmark', function(req, res) {
-/*
-    res.setHeader('Cache-Control', 'max-age=0, must-revalidate, no-cache, no-store');
-        res.writeHead(200, { 'Content-type': 'application/json' });
-        res.write(JSON.stringify({bookmarks: [], totalRecords: 0 }), 'utf-8');
-        res.end('\n');  
-*/
+
     if (typeof req.session.user_token == 'undefined') {
         res.writeHead(401, { 'Content-type': 'text/html' });
         res.end();
@@ -523,7 +517,7 @@ app.get('/json/bookmark', function(req, res) {
     
     var query = user.getConnectedObjects({
         relation: 'mybookmark',
-        orderBy: '__utclastupdateddate',
+        orderBy: 'timestamp',
         pageSize: 50
     });
 
@@ -622,6 +616,7 @@ app.put('/json/bookmark/:id', function(req, res) {
         url: req.body.url,
         title: req.body.title,
         description: req.body.description,
+        timestamp: new Date().getTime(),
         __id: req.body.id
     });
 
@@ -716,6 +711,7 @@ app.post('/json/bookmark/:id?', function(req, res) {
         url: req.body.url,
         title: req.body.title,
         description: req.body.description,
+        timestamp: new Date().getTime(),
         __tags: req.body.tags
     });
 
@@ -803,22 +799,19 @@ app.post('/json/import', function(req, res) {
         res.end();
         return;
     }  
-      
-    var form = new formidable.IncomingForm();
-    form.uploadDir = __dirname;
+
+
+    if (!req.files || !req.files.file || req.files.file.type != 'text/html') {
+        res.writeHead(302, { 'Location': '/account' });
+        res.end();
+        return;
+    }
     
-    form.addListener('file', function(name, file) {
-        fs.readFile(file.path, 'utf8', function(error, content) {
-            importFrom(content, req, res);
-            fs.unlink(file.path);
-        });
-    });
-    
-    form.parse(req, function(err, fields, files) {
-      if (err) {
-          console.log(err);
-          res.end();
-      }
+    var Appacitive = getAppacitiveInstance(req.session.user, req.session.user_token);
+
+    fs.readFile(req.files.file.path, 'utf8', function(error, content) {
+        importFrom(content, req, res, Appacitive);
+        fs.unlink(req.files.file.path);
     });
  
 });
@@ -834,100 +827,102 @@ function md5(str) {
     .digest('hex');
 };
 
-function importFrom(html, req, res) {
+function importToAppacitive(req, res, Appacitive, links, tags, bookmarks) {
+    var batch = new Appacitive.Batch();
+    var Bookmark = getBookmarkClass(Appacitive);
 
-    var regex = /<a([^>]*)>([^<]*)<\/a>/gmi;
+    var BkmrkTag = getBookmark_TagConnectionClass(Appacitive);
+    var MyBkmrk = getBookmark_userConnectionClass(Appacitive)
+    var Tag = Appacitive.Object.extend('tag', {
+        constructor: function(attrs) {
+            if (attrs.id) attrs.__id = id;
+            delete attrs.id;
 
-    //Extract anchor tags from the import file
-    var list = [];
-    while (true) {
-        matches = regex.exec(html);
-            
-        if (matches !== null) {
-            list.push([matches[1], matches[2]]);
-        } else {
-            break;
-        }
-    }
-    
-    //Stick the attributes from the anchor tag onto an object
-    var links = [];
-    list.forEach(function(link) {
-              
-        regex = /(\w+?)=["']{0,1}(.*?)["']{0,1}\s+/g
-        var obj = { title: link[1] };
-        while (true) {
-            matches = regex.exec(' ' + link[0] + ' ');
-            if (matches !== null) {
-                obj[matches[1].toLowerCase()] = matches[2];
-            } else {
-                break;
-            }
-        }
-                
-        var old = obj.tags;
-        if (typeof obj.tags == 'undefined' || obj.tags == '') {
-            obj.tags = [];
-        } else if (obj.tags.indexOf(',') === -1) {
-            obj.tags = [obj.tags];
-        } else {
-            obj.tags = obj.tags.replace(/"([^,]*),([^"]*)"/gi,"$1 $2").split(',');
-        }
-      
-        if ((obj.href.indexOf('http://') === 0 || obj.href.indexOf('https://') === 0) && obj.title.length > 0) {
-            links.push(obj);
+            Appacitive.Object.apply(this, arguments);
         }
     });
-    
-    console.log("Importing " + links.length + "links");
-  
-    importQueue = 0;
-    links.forEach(function(link) {
-        importQueue++;
-        link.tags.forEach(function(tag) {
-            importQueue++;
-        });
-    });
-    
+    var apBookmarks = new (Appacitive.Collection.extend({ model:  Bookmark }))();
+
     //Insert the bookmarks and their tags into the database
     links.forEach(function(link) {
-      
+        
         if (typeof link['add_date'] == 'undefined' || parseInt(link['add_date']) == 0) {
-            link['add_date'] = 'CURRENT_TIMESTAMP';
+            link['timestamp'] = new Date().getTime();
         } else {
-            link['add_date'] = "FROM_UNIXTIME('" + link['add_date'] + "')";
+            link['timestamp'] = new Date(link['add_date']  * 1000).getTime();
         }
-        console.log(link['add_date']);
-        
-        if (typeof link['private'] == 'undefined') {
-            link['private'] = 0;
+
+        var bookmark = bookmarks.find(function(r) { return r.url.toLowerCase() == link.url.toLowerCase(); });
+        if (!bookmark) {
+            bookmark = new Bookmark(link);
+            batch.add(new MyBkmrk(bookmark));
+
+            apBookmarks.add(bookmark);
         }
-              
-        var params = [req.session.user_id, link['href'], link['title'], link['private']];
-        client.query('INSERT INTO bookmarks (user_id, url, title, private, created_at) VALUES (?, ?, ?, ?, ' + link['add_date'] + ')', params, function(err, info) {
-            if (err) console.log(err);
-            importQueue--;            
-            
-            link.tags.forEach(function(tag) {
-                tag = tag.replace('.', ' ').replace('-', ' ');
-                client.query('INSERT INTO tags (bookmark_id, tag) VALUES (?, ?)', [info.insertId, tag], function(err) {
-                    if (err) console.log(err);
-                    importQueue--;
-                    
-                    if (importQueue == 0) {
-                        res.writeHead(302, { 'Location': '/bookmarks' });
-                        res.end();                      
-                    }
-                    
-                });
-            });
-            
-            if (importQueue == 0) {
-                res.writeHead(302, { 'Location': '/bookmarks' });
-                res.end();                      
-            }            
-        
+
+        batch.add(bookmark);
+
+        link.tags.forEach(function(t) {
+            t = t.replace(' ', '-');
+            if (bookmark.tags().indexOf(t) == -1) {
+                var tag = tags.find(function(a) { return a.get('tag').toLowerCase() == t.toLowerCase(); });
+                if (!tag) { 
+                    tag = new Tag({ tag: t });
+                    tags.push(tag);
+                }
+                batch.add(new BkmrkTag(tag, bookmark));
+                bookmark.addTag(t);
+            }
         });
     
     });
+
+    req.connection.setTimeout(120000);
+    batch.execute().then(function() {
+        webshotProcess.send({ type: 'IMPORT', bookmarks: apBookmarks.toJSON() });
+        console.log("Sending message to child process");
+        setTimeout(function() {
+            res.writeHead(302, { 'Location': '/bookmarks' });
+            res.end();       
+        }, 2000);
+    }, function(err) {
+       console.log(err);
+       res.writeHead(302, { 'Location': '/account' });
+       res.end();   
+    });    
+}
+
+function importFrom(html, req, res, Appacitive) {
+
+    var parser = require('./bookmark-parser.js');
+
+    parser(html, function(links) {
+     
+        console.log("Importing " + links.length + " bookmarks");
+
+        var tags = [];
+
+        var cb = function(err) {
+            if (err) console.log(err);
+        
+
+            var query = Appacitive.User.current().getConnectedObjects({
+                relation: 'mybookmark',
+                orderBy: '__utclastupdateddate',
+                pageSize: 200
+            });
+
+            var bookmarks = [];
+
+            var success = function(results) {
+                bookmarks.push.apply(bookmarks, results);
+                if (results.isLastPage) importToAppacitive(req,res, Appacitive, links, tags, bookmarks);
+            };
+
+            query.fetch().then(success);
+        };
+
+        searchTags(req.session.user_id, tags, "", Appacitive, cb, 5);
+    });
+    
 };
