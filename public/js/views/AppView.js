@@ -6,21 +6,21 @@ var AppView = Backbone.View.extend({
         "click  #btn-addbookmark":     "addbookmark",
         "click  #btn-account":         "account",
         "click  #btn-logout":          "logout",
-        "click  #btn-login":           "toggleLogin",
         "submit #frm-search":          "search",        
         "submit #frm-login":           "login"
     },
     
     initialize: function() {
-        _.bindAll(this, 'render', 'search', 'home', 'mytags', 'addbookmark', 'account', 'logout', 'toggleLogin', 'login');
+        _.bindAll(this, 'render', 'search', 'home', 'mytags', 'addbookmark', 'account', 'logout', 'login');
     },
     
     render: function() {
         $('#header').html(Templates.header);
         
         if (typeof App.user != 'undefined') {
-            $('#header .public').hide();
-            $('#header .logged-in').show();
+            $('#header .public').addClass('hidden');
+        } else {
+            $('#header .logged-in').addClass('hidden');
         }
     },
     
@@ -68,25 +68,14 @@ var AppView = Backbone.View.extend({
         }, 1000);
     },
     
-    toggleLogin: function(e) {
-        e.preventDefault();
-        
-        l = $(e.target).offset().left;
-        t = $(e.target).offset().top;
-        height = $(e.target).outerHeight();
-        width = $(e.target).outerWidth();
-                
-        $('#login').css('top', t + height);
-        $('#login').css('left', l - 328);
-        $('#login').toggle();
-    },
-    
     login: function(e) {
         e.preventDefault();
         
-        var username = $('#login input[name=username]').val();
-        var password = $('#login input[name=password]').val();
+        var username = $('input[name=username]').val();
+        var password = $('input[name=password]').val();
         
+        $('#login-error').hide();
+
         var l = Ladda.create($('button', e.target)[0]);
         l.start();
 
@@ -95,16 +84,15 @@ var AppView = Backbone.View.extend({
             url: '/json/login',
             dataType: 'json',
             data: { username: username, password: password },
-            success: function(data) {
-                l.stop();
-                $('#header .public').hide();
-                $('#header .logged-in').show();                
+            success: function(data) {              
                 App.user = data;                
+                $('#header .logged-in').removeClass('hidden');
+                $('#header .public').removeClass('show').addClass('hidden');
                 App.router.navigate("bookmarks", true);             
             },
             error: function() {
                 l.stop();
-                $('#login-error').html('Invalid username or password.').addClass('alert-message').addClass('error');
+                $('#login-error').html('Invalid username or password.').show().addClass('alert-message').addClass('error');
             }
         });  
 

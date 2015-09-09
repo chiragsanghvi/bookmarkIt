@@ -8,6 +8,17 @@ var BookmarkView = Backbone.View.extend({
     },
     
     initialize: function() {
+        //Set default handlebar helpers
+        Handlebars.registerHelper('isEmpty', function (value, options) {
+            var fnTrue = options.fn, fnFalse = options.inverse;
+            return _.isEmpty(value) ? fnTrue(this) : fnFalse(this);
+        });
+
+        Handlebars.registerHelper('isNotEmpty', function (value, options) {
+            var fnTrue = options.fn, fnFalse = options.inverse;
+            return _.isEmpty(value) ? fnFalse(this) : fnTrue(this);
+        });
+
         _.bindAll(this, 'render', 'edit', 'del');
         
         var d = new Date(this.model.get('timestamp'));
@@ -17,7 +28,7 @@ var BookmarkView = Backbone.View.extend({
         this.model.set({thumburl: encodeURIComponent(this.model.get('url')) });
         this.model.bind('change', this.render);
                 
-        $(this.el).addClass('bookmark');
+        $(this.el).addClass('portlet bookmark light');
     },
 
     render: function() {
@@ -39,7 +50,7 @@ var BookmarkView = Backbone.View.extend({
             App.router.view.body.collection.remove(this.model);
             this.model.destroy();
             $(this.el).remove();
-            $(App.router.view.body.el).masonry('reload');
+            $(App.router.view.body.el).masonry();
             if (App.router.view.body.collection.length == 0) {
                 App.router.view.body.search = false;
                 App.router.view.body.render();

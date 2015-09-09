@@ -1,12 +1,17 @@
+
 <div class="thumb"><a href="{{url}}"><img src="{{screenshot}}" style="width: 228px; height: 160px" /></a></div>
 <div class="title"><a href="{{url}}">{{title}}</a></div>
-<p class="description">{{description}}</p>
+{{#isNotEmpty description}}<p class="description">{{description}}</p>{{/isNotEmpty}}
 <ul class="tags">
 {{#each tags}}
    <li class="tag">{{this}}</li>
 {{/each}}
 </ul>
-<div class="meta">
-  <span class="editdelete"><a href="#" class="edit">edit</a> &middot; <a href="#" class="delete">delete</a></span>
-  <span>{{date}}</span>
+<div class="portlet-title">
+	<div class="caption"><span class="pull-left caption-helper">{{date}}</span></div>
+	<div class="actions">
+		<a href="javascript:void(0);" class="btn btn-default btn-sm edit"><i class="glyphicon glyphicon-pencil "></i> Edit </a>
+		<a href="#" class="btn btn-default btn-sm delete"><i class="glyphicon glyphicon-trash "></i> Delete </a>
+	</div>
 </div>
+

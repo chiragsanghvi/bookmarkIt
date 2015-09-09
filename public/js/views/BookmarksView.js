@@ -45,8 +45,8 @@ var BookmarksView = Backbone.View.extend({
             
         } else {
             
-            $(this.el).css('margin', '100px auto 15px auto').css('width', 'auto').css('background', 'transparent');
-            $(this.el).html('');
+            $(this.el).css('margin', '20px auto 15px auto').css('width', 'auto').css('background', 'transparent');
+            $(this.el).html('').addClass('container');
             
             var self = this;
             _(this.collection.models).each(function(bookmark) {
@@ -57,7 +57,7 @@ var BookmarksView = Backbone.View.extend({
             
             $(this.el).masonry({
                 itemSelector: '.bookmark',
-                columnWidth: 265,
+                columnWidth: 300,
                 isFitWidth: true
             });
             

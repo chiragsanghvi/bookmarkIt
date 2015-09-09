@@ -1,20 +1,84 @@
-        <div id="blackbar">  
-            <div class="wrap">
-              
-                <ul class="logged-in">
-                    <li><form id="frm-search"><input type="text" name="search" placeholder="Search bookmarks" class="span3" /></form></li>
-                    <li><a href="/mytags"  class="btn primary" id="btn-mytags">my tags</a></li>
-                    <li><a href="/"  class="btn primary" id="btn-addbookmark">add a bookmark</a></li>
-                    <li><a href="/account" class="btn primary" id="btn-account">my account</a></li>
-                    <li><a href="/logout" class="btn primary" id="btn-logout">log out</a></li>
-                </ul>
+    <nav class="navbar navbar-inverse navbar-fixed-top" id="blackbar">
+        <div class="container">
+        <div class="navbar-header logged-in">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="/" id="btn-home">bookmarkIt</a>
+        </div>  
+        <nav class="navbar-collapse collapse logged-in" id="navbar">
+            <ul class="nav navbar-nav navbar-right ">
+                <li>
+                  <form id="frm-search">
+                    <div class="input-icon right">
+                      <input type="text" name="search" placeholder="Search bookmarks" class="form-control input-sm" style="margin-top:10px;" />
+                      <i class="glyphicon glyphicon-search"></i>
+                    </div>
+                  </form>
+                </li>
+                <li>
+                  <div style="padding: 3px 5px 0px 10px;">
+                    <a href="/bookmarks"  title="My Bookmarks" class="btn btn-primary btn-sm" id="btn-mybookmarks" style="margin-top:8px;"><i class="glyphicon glyphicon-bookmark"></i></a>
+                  </div>
+                </li>
+                <li>
+                  <div style="padding: 3px 5px 0px 5px;">
+                    <a href="/mytags"  title="My Tags" class="btn btn-primary btn-sm" id="btn-mytags"style="margin-top:8px;"><i class="glyphicon glyphicon-tags"></i></a>
+                  </div>
+                </li>
+                <li>
+                  <div style="padding: 3px 5px;">
+                  <a href="/"  class="btn btn-primary btn-sm" title="Add a Bookmark" id="btn-addbookmark"style="margin-top:8px;"><i class="glyphicon glyphicon-plus"></i></a>
+                  </div>
+                </li>
                 
-                <ul class="public">
-                    <li><a href="/login" class="btn primary" id="btn-login">log in</a></li>
-                </ul>
-                
-                <a href="/" id="btn-home" style="text-decoration:none;"><h2 style="color: #999;
-text-shadow: 0px 3px 8px #2a2a2a;">bookmarkIt</h2></a>
-                
+                <li class="dropdown dropdown-user">
+                  <a href="#" class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown" data-close-others="true" aria-expanded="false" style="padding-top: 11px;padding-bottom: 10px;">
+                    <div class="btn btn-primary btn-sm"> 
+                    <span style="margin-right: 5px;">
+                      <i class="glyphicon glyphicon-user"></i>  
+                    </span>  
+                    <i class="glyphicon glyphicon-chevron-down"></i> 
+                    </div>
+                  </a>
+                  <ul class="dropdown-menu">
+                    <li>
+                      <a href="/account"id="btn-account">
+                      <i class="glyphicon glyphicon-briefcase"></i> My Profile </a>
+                    </li>
+                    <li class="divider">
+                    </li>
+                    <li>
+                      <a href="/logout" id="btn-logout"  data-style="expand-right">
+                      <i class="glyphicon glyphicon-log-out"></i> Log Out </a>
+                    </li>
+                  </ul>
+                </li>
+            </ul>
+        </nav>
+        <div class="navbar-header public">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#login" aria-expanded="false">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="/" id="btn-home">bookmarkIt</a>
+        </div> 
+        <div id="login" class="navbar-collapse collapse public">
+          <form class="navbar-form navbar-right" id="frm-login">
+          <label id="login-error"></label>
+            <div class="form-group">
+              <input type="text" name="username" placeholder="Username" class="form-control input-sm">
             </div>
-        </div>   
+            <div class="form-group">
+              <input type="password" name="password" placeholder="Password" class="form-control input-sm">
+            </div>
+            <button type="submit" class="btn btn-success btn-sm" data-style="expand-right"><i class="glyphicon glyphicon-log-in" style="margin-right:10px;"></i>Sign in</button>
+          </form>
+        </div><!--/.navbar-collapse -->
+        </div>
+    </nav>

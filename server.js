@@ -49,7 +49,8 @@ app.use(express.logger({ format: ':method :url' }));
 
 app.use('/css', express.static(__dirname + '/public/css'));
 app.use('/js', express.static(__dirname + '/public/js'));
-app.use('/images', express.static(__dirname + '/public/images'))
+app.use('/images', express.static(__dirname + '/public/images'));
+app.use('/fonts', express.static(__dirname + '/public/fonts'));
 app.use(express.favicon(__dirname + '/public/favicon.ico'));
 
 /*  ==============================================================
@@ -66,7 +67,7 @@ function bundle() {
         'backbone-min',
         'jquery.masonry.min',
         'jquery.tagsinput.min',
-        'bootstrap-modal',
+        'bootstrap.min',
         'jquery-ui.min',
         'models/Bookmark',
         'models/BookmarksCollection',
@@ -91,10 +92,10 @@ function bundle() {
         bundle += "\n/**\n* " + file + ".js\n*/\n\n" + fs.readFileSync(__dirname + '/public/js/' + file + '.js') + "\n\n";
     });
     
-    var ast = parser.parse(bundle);
-    ast = uglifyer.ast_mangle(ast);
-    ast = uglifyer.ast_squeeze(ast);
-    bundle = uglifyer.gen_code(ast)
+    //var ast = parser.parse(bundle);
+    //ast = uglifyer.ast_mangle(ast);
+    //ast = uglifyer.ast_squeeze(ast);
+    //bundle = uglifyer.gen_code(ast)
     
     fs.writeFileSync(__dirname + '/public/js/bundle.js', bundle, 'utf8');
     
@@ -253,7 +254,7 @@ app.put('/json/user', function(req, res) {
     var Appacitive = getAppacitiveInstance(req.session.user, req.session.user_token);
 
     var user = Appacitive.User.current();
-    if (req.body.username && req.body.username.length > 0) user.set('username', req.body.username);
+    if (req.body.firstname && req.body.firstname.length > 0) user.set('firstname', req.body.firstname);
     if (req.body.email && req.body.email.length > 0) user.set('email', req.body.email);
 
     var cb = function(err) {

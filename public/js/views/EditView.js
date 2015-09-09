@@ -16,9 +16,12 @@ var EditView = Backbone.View.extend({
         var source = Templates.edit;
         var template = Handlebars.compile(source);
         var html = template(this.model.attributes);
-        $(this.el).html(html);
+        this.el = $(html)[0];
         
         $('body').append(this.el);
+
+        this.delegateEvents();
+
         var self = this;
         this.$('input[name=tags]').attr('id', 'tags' + this.model.id);
         this.$('input[name=tags]').tagsInput({
@@ -33,6 +36,7 @@ var EditView = Backbone.View.extend({
                 });
             }, 
             unique: true,
+            width:'100%',
             onAddTag: function(value, item) {
                 if (item) self.addTags.push(item.item);
                 else self.addTags.push({ tag: value });
@@ -49,14 +53,17 @@ var EditView = Backbone.View.extend({
         
         $(this.el).modal({
             backdrop: true,
-            keyboard: false,
+            keyboard: true,
             show: true
         });
     },
     
     unrender: function() {
         $(this.el).modal('hide');
-        $(this.el).remove();
+        var that = this;
+        setTimeout(function() {
+            that.el.remove();
+        }, 200);
     },
     
     save: function(e) {
@@ -123,16 +130,16 @@ var EditView = Backbone.View.extend({
 
         var changed = this.model.changedAttributes();
 
-        var l = Ladda.create($('.save')[0]);
-        $('.cancel').hide();
+        var l = Ladda.create($('.save', $(this.el))[0]);
+        $('.cancel', $(this.el)).hide();
 
         l.start();
-
+        var that = this;
         var error = function() {
             l.stop();
-            $('.cancel').show();
+            $('.cancel',$(that.el)).show();
             console.log(err);
-            $('.bookmark_info').html('Unable to save bookmark');
+            $('.bookmark_info',$(that.el)).html('Unable to save bookmark');
         };
 
         var success = function(bookmark) {
@@ -144,7 +151,7 @@ var EditView = Backbone.View.extend({
                 if (isNew) {
                     App.router.view.body.collection.add(self.model, { at: 0 });
                 } else {
-                    $(App.router.view.body.el).masonry('reload');
+                    $(App.router.view.body.el).masonry();
                 }
                 
                 self.unrender();

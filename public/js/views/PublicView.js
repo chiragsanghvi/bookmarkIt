@@ -6,7 +6,7 @@ var PublicView = Backbone.View.extend({
     
     initialize: function() {
         _.bindAll(this, 'render', 'signup');
-        $(this.el).css('width', '960px').css('margin', '0px auto');
+        $(this.el).css('max-width', '960px').css('margin', '0px auto');
     },
     
     render: function() {
@@ -58,8 +58,8 @@ var PublicView = Backbone.View.extend({
                 if (typeof data.error != 'undefined') {
                     $('#signup-error').html(data.error).addClass('alert-message').addClass('error');
                 } else {
-                    $('#header .public').hide();
-                    $('#header .logged-in').show();
+                    $('#header .logged-in').removeClass('hidden');
+                    $('#header .public').removeClass('show').addClass('hidden');
                     App.user = data;
                     App.router.navigate("bookmarks", true);
                 }

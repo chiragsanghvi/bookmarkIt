@@ -15,7 +15,7 @@ var AccountView = Backbone.View.extend({
         var html = template(App.user);
         $(this.el).html(html);
         
-        $(this.el).css('margin', '100px auto 15px auto');
+        $(this.el).css('margin', '20px auto 15px auto').addClass('container');
         $('#app').append(this.el);
         
         $(this.el).masonry({
@@ -33,14 +33,14 @@ var AccountView = Backbone.View.extend({
         
         e.preventDefault();
 
-        var username = this.$('input[name=username]').val();
+        var firstname = this.$('input[name=firstname]').val();
         var email = this.$('input[name=email]').val();
         
         var self = this;
 
         var error = '';
         
-        if (username.length == 0 || email.length == 0) {
+        if (firstname.length == 0 || email.length == 0) {
             error = 'Please fill out all the fields.';
         }
 
@@ -64,7 +64,7 @@ var AccountView = Backbone.View.extend({
             type: 'PUT',
             url: '/json/user',
             dataType: 'json',
-            data: { username: username, email: email },
+            data: { firstname: firstname, email: email },
             success: function(data) {
                 l.stop();
                 console.log(data);
