@@ -44,7 +44,7 @@ var EditView = Backbone.View.extend({
             onRemoveTag: function(value, item) {
                 for (var i = 0; i < self.addTags.length; i = i+1) {
                     if (self.addTags[i].tag == value) {
-                        self.addTags[i].splice(i, 1);
+                        self.addTags.splice(i, 1);
                         break;
                     }
                 }
