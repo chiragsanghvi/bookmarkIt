@@ -146,11 +146,11 @@ app.get('*', function(req, res, next) {
     if (typeof req.session.user_token != 'undefined') {
         require('sys').log(req.session.user_token + " " + JSON.stringify(req.session.user));
         init = "$(document).ready(function() { App.user = " + JSON.stringify(req.session.user) + "; App.initialize(); });";
-    }
+    } 
     
     fs.readFile(__dirname + '/public/templates/index.html', 'utf8', function(error, content) {
         if (error) console.log(error);
-        content = content.replace("{{init}}", init);
+        content = content.replace("{{init}}", init);  
         res.writeHead(200, { 'Content-Type': 'text/html' });
         res.end(content, 'utf-8');
     });

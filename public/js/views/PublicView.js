@@ -61,6 +61,7 @@ var PublicView = Backbone.View.extend({
                     $('#header .logged-in').removeClass('hidden');
                     $('#header .public').removeClass('show').addClass('hidden');
                     App.user = data;
+                    window.localStorage.getItem('bookmarkit-user', JSON.stringify(data)); 
                     App.router.navigate("bookmarks", true);
                 }
             },

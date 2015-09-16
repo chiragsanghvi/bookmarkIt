@@ -2,11 +2,13 @@
 <div class="thumb"><a href="{{url}}"><img style='background-image: url("{{screenshot}}");' /></a></div>
 <div class="title"><a href="{{url}}">{{title}}</a></div>
 {{#isNotEmpty description}}<p class="description">{{description}}</p>{{/isNotEmpty}}
+{{#isNotEmpty tags}}
 <ul class="tags">
 {{#each tags}}
    <li class="tag">{{this}}</li>
 {{/each}}
 </ul>
+{{/isNotEmpty}}
 <div class="portlet-title">
 	<div class="caption"><span class="pull-left caption-helper">{{date}}</span></div>
 	<div class="actions">

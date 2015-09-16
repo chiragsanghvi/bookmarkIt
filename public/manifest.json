@@ -1,0 +1,17 @@
+{
+  "manifest_version": 2,
+
+  "name": "Bookmarkit",
+  "description": "A Visual Bookmark Organizer",
+  "version": "1.0",
+
+  "browser_action": {
+    "default_icon": "bookmarkit.png",
+    "default_popup": "chromeExtension.html"
+  },
+  "permissions": [
+    "activeTab",
+    "https://ajax.googleapis.com/",
+    "http://bookmarkit.appacitive.com/"
+  ]
+}

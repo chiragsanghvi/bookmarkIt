@@ -21,8 +21,7 @@ var App = {
         $(window).resize(function() {
             self.resizeHeader();
         });
-        this.resizeHeader();      
-        
+        this.resizeHeader();          
     },
     
     resizeHeader: function() {

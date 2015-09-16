@@ -13,6 +13,7 @@ var BookmarkItRouter = Backbone.Router.extend({
     views: {},
     
     initialize: function() {
+        
         _.bindAll(this, 'index', 'bookmarks', 'tag', 'tags', 'search', 'bookmarklet', 'setBody');
                 
         //Create all the views, but don't render them on screen until needed
