@@ -14,23 +14,6 @@ var webshotProcess = require('child_process').fork('./webshot.js');
 
 //var RedisStore = require('connect-redis')(express);
 
-var getAppacitiveInstance = function (user, userToken) {
-
-    var Appacitive = new multiAppacitive();
-
-    Appacitive.config.apiBaseUrl = 'http://apis.appacitive.com/v1.0/'
-
-    Appacitive.initialize({ 
-        apikey: "sSfHIv9RZMojN4Ih3MiLYCgdnQuW8RrpRbpDw5IiQfo=", 
-        env: "sandbox",
-        appId: "57208653680346724",
-        userToken: userToken, 
-        user: user
-    });
-
-    return Appacitive;
-};
-
 /*  ==============================================================
     Configuration
 =============================================================== */
@@ -46,6 +29,25 @@ app.use(express.cookieSession({ secret: salt, cookie: { maxAge: 3600000 * 24 * 3
 //app.use(express.session({ secret: salt, store: new RedisStore, cookie: { maxAge: 3600000 * 24 * 30 } }));
 app.use(express.methodOverride());
 app.use(express.logger({ format: ':method :url' }));
+
+// a middleware with no mount path; gets executed for every request to the app
+app.use(function (req, res, next) {
+    var Appacitive = new multiAppacitive();
+    Appacitive.config.apiBaseUrl = 'http://apis.appacitive.com/v1.0/';
+
+    Appacitive.initialize({ 
+        apikey: "sSfHIv9RZMojN4Ih3MiLYCgdnQuW8RrpRbpDw5IiQfo=", 
+        env: "sandbox",
+        appId: "57208653680346724",
+        userToken: req.session.user_token, 
+        user: req.session.user
+    });
+
+    Appacitive.Session.initialized = true;
+    req.Appacitive = Appacitive;
+    next();
+
+});
 
 app.use('/css', express.static(__dirname + '/public/css'));
 app.use('/js', express.static(__dirname + '/public/js'));
@@ -164,7 +166,7 @@ app.get('*', function(req, res, next) {
 //Register a new user
 app.post('/json/register', function(req, res) {
 
-    var Appacitive = getAppacitiveInstance();
+    var Appacitive = req.Appacitive;
 
     var user = {
         username: req.body.username,
@@ -203,7 +205,7 @@ app.post('/json/register', function(req, res) {
 
 //Log in an existing user, starting a session
 app.post('/json/login', function(req, res) {
-    var Appacitive = getAppacitiveInstance();
+    var Appacitive = req.Appacitive;
 
     var username = req.body.username;
     var password = req.body.password;
@@ -233,7 +235,7 @@ app.post('/json/login', function(req, res) {
 //Log out the current user
 app.post('/json/logout', function(req, res) {
     if (req.session.user_token) {
-        var Appacitive = getAppacitiveInstance(req.session.user, req.session.user_token);
+        var Appacitive = req.Appacitive;
         Appacitive.User.current().logout(true);
     }
     req.session = null;
@@ -251,7 +253,7 @@ app.put('/json/user', function(req, res) {
         return;
     }    
     
-    var Appacitive = getAppacitiveInstance(req.session.user, req.session.user_token);
+    var Appacitive = req.Appacitive;
 
     var user = Appacitive.User.current();
     if (req.body.firstname && req.body.firstname.length > 0) user.set('firstname', req.body.firstname);
@@ -287,7 +289,7 @@ app.put('/json/user/password', function(req, res) {
         return;
     }    
     
-    var Appacitive = getAppacitiveInstance(req.session.user, req.session.user_token);
+    var Appacitive = req.Appacitive;
 
     var user = Appacitive.User.current();
 
@@ -358,7 +360,7 @@ app.get('/json/tag', function(req, res) {
         return;
     }  
 
-    var Appacitive = getAppacitiveInstance(req.session.user, req.session.user_token);
+    var Appacitive = req.Appacitive;
     
     var tags = [];
 
@@ -397,7 +399,7 @@ app.get('/json/autocomplete', function(req, res) {
         return;
     }  
 
-    var Appacitive = getAppacitiveInstance(req.session.user, req.session.user_token);
+    var Appacitive = req.Appacitive;
     
     var tags = [];
     
@@ -510,7 +512,7 @@ app.get('/json/bookmark', function(req, res) {
         return;
     }
 
-    var Appacitive = getAppacitiveInstance(req.session.user, req.session.user_token);
+    var Appacitive = req.Appacitive;
     
     var result = { bookmarks:[], totalRecords: 0 };
 
@@ -609,7 +611,7 @@ app.put('/json/bookmark/:id', function(req, res) {
         return;
     }
     
-    var Appacitive = getAppacitiveInstance(req.session.user, req.session.user_token);
+    var Appacitive = req.Appacitive;
     
     var Bookmark = getBookmarkClass(Appacitive);
 
@@ -704,7 +706,7 @@ app.post('/json/bookmark/:id?', function(req, res) {
         return;
     }    
     
-    var Appacitive = getAppacitiveInstance(req.session.user, req.session.user_token);
+    var Appacitive = req.Appacitive;
     
     var Bookmark = getBookmarkClass(Appacitive);
 
@@ -769,7 +771,7 @@ app.del('/json/bookmark/:id', function(req, res) {
         return;
     }
 
-    var Appacitive = getAppacitiveInstance(req.session.user, req.session.user_token);
+    var Appacitive = req.Appacitive;
 
     var Bookmark = Appacitive.Object.extend('bookmark');
 
@@ -808,7 +810,7 @@ app.post('/json/import', function(req, res) {
         return;
     }
     
-    var Appacitive = getAppacitiveInstance(req.session.user, req.session.user_token);
+    var Appacitive = req.Appacitive;
 
     fs.readFile(req.files.file.path, 'utf8', function(error, content) {
         importFrom(content, req, res, Appacitive);
