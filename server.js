@@ -46,7 +46,6 @@ app.use(function (req, res, next) {
     Appacitive.Session.initialized = true;
     req.Appacitive = Appacitive;
     next();
-
 });
 
 app.use('/css', express.static(__dirname + '/public/css'));
